@@ -2,6 +2,8 @@ import axios from 'axios';
 
 const list = document.querySelector('.list');
 
+console.log('111111111111111111111');
+
 async function getUser() {
   try {
     const response = await axios.get(
