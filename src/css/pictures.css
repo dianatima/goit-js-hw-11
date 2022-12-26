@@ -31,7 +31,7 @@ img {
   font-weight: bold;
 }
 
-.list {
+.gallery {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-around;
@@ -41,4 +41,8 @@ img {
   width: 340px;
   margin-bottom: 15px;
   box-shadow: rgba(0, 0, 0, 0.15) 0px 3px 3px 0px;
+}
+
+.is-hidden {
+  display: none;
 }
