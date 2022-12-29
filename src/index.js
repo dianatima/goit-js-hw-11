@@ -1,5 +1,4 @@
 import axios from 'axios';
-// import API from './js/api-service';
 import getRefs from './js/get-refs';
 import Notiflix from 'notiflix';
 import SimpleLightbox from 'simplelightbox';
@@ -11,6 +10,7 @@ let page = '1';
 let query = '';
 let per_page = 40;
 let isFirstSearch = false;
+let stopFetching = false;
 
 const BASE_URL = 'https://pixabay.com/api';
 const API_KEY = '32083326-5131f12fe438843c4a27c5327';
@@ -21,6 +21,7 @@ let lightbox = new SimpleLightbox('.gallery a', {
 });
 
 async function fetchPictures(query, page) {
+  if (stopFetching) return;
   const params = new URLSearchParams({
     key: API_KEY,
     q: query,
@@ -31,15 +32,15 @@ async function fetchPictures(query, page) {
     per_page: per_page,
   });
   const response = await axios.get(`${BASE_URL}/?${params}`);
-  console.log(response);
+  // console.log(response);
   if (response.status !== 200) {
     throw new Error(response.status);
   }
   return response.data;
 }
 
-async function getPictures(query, page) {
-  await fetchPictures(query, page)
+function getPictures(query, page) {
+  fetchPictures(query, page)
     .then(res => {
       const arrayLength = res.hits.length;
 
@@ -72,11 +73,12 @@ async function getPictures(query, page) {
 
       lightbox.refresh();
     })
-    .catch(error =>
+    .catch(error => {
+      stopFetching = true;
       Notiflix.Notify.failure(
         'Sorry, there are no images matching your search query. Please try again.'
-      )
-    );
+      );
+    });
 }
 
 function renderPictures(pictures) {
@@ -118,13 +120,14 @@ function renderPictures(pictures) {
       }
     )
     .join('');
-  // refs.gallery.insertAdjacentHTML = ('beforeend', pictureElem);
+
   refs.gallery.innerHTML += pictureElem;
 }
 
 refs.searchForm.addEventListener('submit', onSubmit);
 
-async function onSubmit(event) {
+function onSubmit(event) {
+  stopFetching = false;
   event.preventDefault();
   page = 1;
   isFirstSearch = true;
@@ -151,7 +154,7 @@ async function onSubmit(event) {
 //   getPictures(query, page);
 // }
 
-window.addEventListener('scroll', () => {
+window.addEventListener('scroll', async () => {
   const documentRect = document.documentElement.getBoundingClientRect();
   // console.log('bottom', documentRect.bottom);
   if (documentRect.bottom < document.documentElement.clientHeight + 150) {
